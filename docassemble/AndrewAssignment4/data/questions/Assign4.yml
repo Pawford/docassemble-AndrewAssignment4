@@ -1,0 +1,157 @@
+---
+objects:
+  - user: Individual
+  - child_household: DAList.using(object_type=Individual)
+---
+question: |
+  What's your name?
+fields:
+  - First: user.name.first
+  - Last: user.name.last
+---
+need: 
+  - user.name.first
+question: |
+  What is your date of birth?
+fields:
+  - MM/DD/YYYY: user.birthdate
+    datatype: date
+---
+question: |
+  Choose the city that you live in(choose one):
+field: city_living
+choices:
+  - Edmonton
+  - Calgary
+  - Cape Fear
+---
+code: |
+  if has_lawyer:
+    if acting_lawyer:
+      represent = False
+    else:
+      represent = False
+  else:
+    represent = True
+    
+  if afford_lawyer:
+    represent = False
+---
+code: |
+  if Alberta_resident and location_matter:
+    residency = True
+  else:
+    residency = False
+---
+code: |
+  if criminal_matter or family_matter:
+    service_requirement = True
+  else:
+    service_requirement = False
+---
+mandatory: true
+code: |
+ if service_requirement and residency and (represent or appeal_matter):
+   can_help = True
+ else:
+   can_help = False
+---
+question: |
+  Do you have a lawyer?
+yesno: has_lawyer
+---
+question: |
+    Is your lawyer still acting for you?
+yesno: acting_lawyer
+---
+question: |
+  Can you afford a lawyer?
+yesno: afford_lawyer
+---
+question: |
+  Is the legal matter you are seeking assistance with located in Alberta?
+yesno: location_matter
+---
+question: |
+  Is this a family law matter?
+yesno: family_matter
+---
+need:
+  - user.birthdate
+question: |
+  Is this a criminal law matter?
+yesno: criminal_matter
+---
+question: |
+  Do you live in Alberta?
+yesno: Alberta_resident
+---
+question: |
+  Is this matter an appeal for which you receive LAA assistance?
+yesno: appeal_matter
+---
+question: |
+  Please tell us your issue
+fields:
+  - "Select all that apply": today_problem
+    datatype: checkboxes
+    choices:
+      - I am a sovereign citizen being oppressed
+      - Tort? I thought you said we were here for the Torte!
+      - I just like talking to lawyers
+      - I just wanted to talk.  Can we be friends?
+---
+question: |
+  ${ user } do you have children?
+yesno: child_household.there_are_any
+mandatory: true
+---
+question: |
+  Tell us the name of the ${ordinal(i)} child. 
+fields:
+  - First name: child_household[i].name.first
+  - Last name: child_household[i].name.last
+---
+question: |
+  So far you have told us about ${len(child_household)} child(ren).
+  Do you have other children?
+yesno: child_household.there_is_another
+mandatory: true
+---
+mandatory: true
+question: |
+  Your children are ${child_household}
+yesno: nextscreen
+---
+question: |
+  Do you like cats?
+yesno: like_cats
+---
+question: |
+ Are you eligible for legal aid because you meet the income requirements?
+yesno: eligible_aid
+---
+question: Here is your document.
+attachment:
+  - name: Memo
+    filename: test.md 
+    content file: AndrewTestTemp.md
+mandatory: True
+---
+mandatory: true
+question: |
+  Sign your name
+subquestion: |
+  By signing your name, you the information
+  you have provided is true on penalty of death.
+signature: target_variable
+under: |
+  ${ user }
+
+---
+mandatory: true
+question: |
+  Thank you for your co-operation.  Please Exit and relax while we decide your fate.
+buttons:
+  Exit: exit
+---
